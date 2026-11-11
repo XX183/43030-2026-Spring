@@ -1,0 +1,33 @@
+name: Analyze Vowel Frequency
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - data.txt
+      - .github/scripts/**
+      - .github/actions/vowel-frequency-analyzer/**
+      - .github/workflows/ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Run Vowel Frequency Analyzer
+        uses: ./.github/actions/vowel-frequency-analyzer
+        with:
+          file: data.txt

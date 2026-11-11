@@ -1,0 +1,26 @@
+name: Vowel Frequency Analyzer
+description: Analyze vowel frequency and update README.
+
+inputs:
+  file:
+    description: Path to the text file to analyze.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Run Vowel Frequency Analyzer
+      shell: bash
+      env:
+        INPUT_FILE: ${{ inputs.file }}
+      run: |
+        FREQ_RESULT=$(python3 .github/scripts/frequency.py "$INPUT_FILE")
+        echo "$FREQ_RESULT"
+        echo "FREQ_RESULT=$FREQ_RESULT" >> "$GITHUB_ENV"
+
+    - name: Update README with Vowel Frequency
+      shell: bash
+      env:
+        GITHUB_USER: ${{ github.actor }}
+      run: |
+        bash .github/scripts/update_readme.sh "$FREQ_RESULT" "$GITHUB_USER"
