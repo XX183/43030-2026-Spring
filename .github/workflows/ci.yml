@@ -6,8 +6,8 @@ on:
       - main
     paths:
       - data.txt
-      - Dockerfile
       - .github/scripts/**
+      - .github/actions/vowel-frequency-analyzer/**
       - .github/workflows/ci.yml
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  analyze:
     runs-on: ubuntu-22.04
 
     steps:
@@ -24,27 +24,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Build Docker image
-        run: docker build -t vowel-frequency-analyzer:latest .
-
-      - name: Run Docker container
+      - name: Run Docker custom action
+        uses: ./.github/actions/vowel-frequency-analyzer
+        with:
+          file: data.txt
         env:
           GITHUB_USER: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          docker run --rm \
-            -v "$GITHUB_WORKSPACE:/app" \
-            -w /app \
-            -e GITHUB_USER \
-            -e GITHUB_TOKEN \
-            -e GITHUB_REPOSITORY \
-            --entrypoint /bin/bash \
-            vowel-frequency-analyzer:latest \
-            -c '
-              set -e
-              git config --global --add safe.directory /app
-              git remote set-url origin \
-                "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-              bash /app/.github/scripts/entrypoint.sh
-            '

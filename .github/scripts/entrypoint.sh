@@ -1,14 +1,21 @@
 #!/bin/bash
 set -e
 
-cd /app
+cd "${GITHUB_WORKSPACE:-/app}"
 
 echo "Starting Frequency Analyzer..."
 
-FREQ_RESULT=$(python3 /app/.github/scripts/frequency.py /app/data.txt)
+git config --global --add safe.directory "$PWD"
+
+if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  git remote set-url origin \
+    "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+fi
+
+FREQ_RESULT=$(python3 .github/scripts/frequency.py "${FILE:-data.txt}")
 echo "$FREQ_RESULT"
 
-bash /app/.github/scripts/update_readme.sh \
+bash .github/scripts/update_readme.sh \
   "$FREQ_RESULT" "$GITHUB_USER"
 
 echo "Process Completed!"

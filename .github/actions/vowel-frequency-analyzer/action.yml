@@ -1,5 +1,5 @@
 name: Vowel Frequency Analyzer
-description: Analyze vowel frequency and update README.
+description: Analyze vowel frequency with Docker and update README.
 
 inputs:
   file:
@@ -7,20 +7,10 @@ inputs:
     required: true
 
 runs:
-  using: composite
-  steps:
-    - name: Run Vowel Frequency Analyzer
-      shell: bash
-      env:
-        INPUT_FILE: ${{ inputs.file }}
-      run: |
-        FREQ_RESULT=$(python3 .github/scripts/frequency.py "$INPUT_FILE")
-        echo "$FREQ_RESULT"
-        echo "FREQ_RESULT=$FREQ_RESULT" >> "$GITHUB_ENV"
-
-    - name: Update README with Vowel Frequency
-      shell: bash
-      env:
-        GITHUB_USER: ${{ github.actor }}
-      run: |
-        bash .github/scripts/update_readme.sh "$FREQ_RESULT" "$GITHUB_USER"
+  using: docker
+  image: docker://ghcr.io/xx183/vowel-frequency-analyzer:latest
+  entrypoint: /bin/bash
+  args:
+    - .github/scripts/entrypoint.sh
+  env:
+    FILE: ${{ inputs.file }}
