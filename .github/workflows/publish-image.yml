@@ -1,0 +1,34 @@
+name: Publish Vowel Analyzer Image
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Log in to GitHub Container Registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_USER: ${{ github.actor }}
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io \
+            -u "$GH_USER" --password-stdin
+
+      - name: Build and publish image
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/XX183/43030-2026-Spring" \
+            -t ghcr.io/xx183/vowel-frequency-analyzer:latest .
+
+          docker push ghcr.io/xx183/vowel-frequency-analyzer:latest
